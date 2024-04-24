@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-deployment
+  labels:
+    component: order
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      component: order
+  template:
+    metadata:
+      labels:
+        component: order
+    spec:
+      containers:
+        - name: order-deployment
+          image: jacknguyenvan/nestjs-rabbitmq-microservices-orders
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: '3000'
+            - name: MONGODB_URI
+              value: mongodb://mongodb-primary:27017/
+            - name: RABBIT_MQ_URI
+              value: amqp://rabbitmq:5672
+            - name: RABBIT_MQ_BILLING_QUEUE
+              value: billing
+            - name: RABBIT_MQ_AUTH_QUEUE
+              value: auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  labels:
+    component: order
+spec:
+  type: NodePort
+  selector:
+    component: order
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: 30000

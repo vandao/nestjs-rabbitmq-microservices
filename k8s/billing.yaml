@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-deployment
+  labels:
+    component: billing
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      component: billing
+  template:
+    metadata:
+      labels:
+        component: billing
+    spec:
+      containers:
+        - name: billing-deployment
+          image: jacknguyenvan/nestjs-rabbitmq-microservices-billing
+          env:
+            - name: RABBIT_MQ_URI
+              value: amqp://rabbitmq:5672
+            - name: RABBIT_MQ_BILLING_QUEUE
+              value: billing
+            - name: RABBIT_MQ_AUTH_QUEUE
+              value: auth

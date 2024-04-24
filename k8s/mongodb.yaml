@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-primary
+  labels:
+    component: mongodb
+spec:
+  selector:
+    matchLabels:
+      component: mongodb
+  serviceName: mongodb
+  template:
+    metadata:
+      labels:
+        component: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - mountPath: /var/lib/mongodb/data
+              name: mongodb-data
+  volumeClaimTemplates:
+    - metadata:
+        name: mongodb-data
+        annotations:
+          volume.beta.kubernetes.io/storage-class: 'hostpath'
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-primary
+  labels:
+    component: mongodb
+spec:
+  selector:
+    component: mongodb
+  ports:
+    - port: 27017
